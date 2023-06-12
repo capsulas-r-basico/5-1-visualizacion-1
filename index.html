@@ -4,7 +4,7 @@
     <title>R and databases</title>
     <meta charset="utf-8" />
     <meta name="author" content="" />
-    <meta name="date" content="2023-06-05" />
+    <meta name="date" content="2023-06-12" />
     <script src="visualizacion-1_files/header-attrs-2.21/header-attrs.js"></script>
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
@@ -21,9 +21,10 @@ class: center, middle
 
 ## INE Educa: Clases abiertas de R
 
+## Visualización con ggplot I
+
 ## Proyecto Ciencia de Datos
 
-### Mayo 2023
 
 
 
@@ -38,7 +39,299 @@ background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
 
-# EJEMPLO
+# La importancia de la visualización
+
+**La visualización juega un rol importante en las etapas del análisis de datos:**
+
+- Exploración
+
+- Modelamiento
+
+- Comunicación
+
+
+"*Un simple gráfico ha traído más información a la mente de los analistas que cualquier otro dispositivo*" (John Tukey)
+
+--
+
+Los gráficos nos permiten comunicar y atraer la atención de una audiencia: [John Tukey](https://es.wikipedia.org/wiki/John_W._Tukey)
+
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Visualizaciones no efectivas
+
+&lt;br/&gt;
+
+.center[
+&lt;img src="imagenes/obamacare.PNG" width="700" /&gt;
+]
+
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Descripción del dataset
+
+Trabajaremos con un dataset de nombres inscritos en el registro civil
+
+Los datos se encuentran en el paquete guaguas de [Riva Quiroga](https://github.com/rivaquiroga/guaguas)
+
+.center[
+&lt;img src="https://raw.githubusercontent.com/rivaquiroga/guaguas/master/man/figures/guaguas-hex.png" width="100" /&gt;
+]
+
+
+--
+
+
+```r
+#install.packages("guaguas")
+library(guaguas)
+head(guaguas, 2)
+```
+
+```
+## # A tibble: 2 × 5
+##    anio nombre sexo      n proporcion
+##   &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt;      &lt;dbl&gt;
+## 1  1920 María  F      2130     0.104 
+## 2  1920 José   M       984     0.0483
+```
+
+### Generemos un gráfico de barras con la cantidad de mujeres y hombres
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Gráfico de barras
+
+Echaremos mano a lo aprendido en videos anteriores
+
+
+```r
+library(tidyverse)
+tabla &lt;- guaguas %&gt;% 
+  group_by(sexo) %&gt;% 
+  summarise(frecuencia = sum(n))
+tabla
+```
+
+```
+## # A tibble: 3 × 2
+##   sexo  frecuencia
+##   &lt;chr&gt;      &lt;dbl&gt;
+## 1 F       10931372
+## 2 I            344
+## 3 M       11197384
+```
+
+--
+
+### Tenemos categorías femenino (F), indeterminado (I) y masculino (M)
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# La sintaxis de ggplot
+
+`ggplot` funciona con un sistema de capas
+
+Siempre comenzaremos con la función `ggplot`
+
+
+```r
+library(ggplot2)
+ggplot(data = tabla, aes(x = sexo, y = frecuencia))
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-3-1.png" style="display: block; margin: auto;" /&gt;
+
+* `data`: tabla para la cual queremos generar el gráfico
+
+* `aes`: viene de *aesthetics*. Contiene los elementos estéticos de nuestro gráfico
+
+    + `x`: variable que será mapeada al eje x 
+    + `y`: variable que será mapeada al eje y
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# La sintaxis de ggplot
+
+
+
+```r
+ggplot(data = tabla, aes(x = sexo, y = frecuencia)) + 
+* geom_bar(stat = "identity")
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto;" /&gt;
+
+### **geom_bar**: capa de figura geométrica
+
+### **identity** le dice a ggplot que no queremos hacer nada con los datos, es decir, graficar la tabla sin modificaciones
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# ¿Qué es exactamente identity?
+
+.center[
+&lt;img src="https://media.giphy.com/media/a5viI92PAF89q/giphy.gif" width="200" /&gt;
+]
+
+`geom_bar` por defecto llama a la función `stat_count`
+
+`stat_count` espera como input una sola variable
+
+
+```r
+ggplot(data = tabla, aes(x = sexo, y = frecuencia)) + 
+* geom_bar()
+```
+
+```
+## Error in `geom_bar()`:
+## ! Problem while computing stat.
+## ℹ Error occurred in the 1st layer.
+## Caused by error in `setup_params()`:
+## ! `stat_count()` must only have an x or y aesthetic.
+```
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# La sintaxis de ggplot
+
+
+```r
+ggplot(data = tabla, aes(x = sexo, y = frecuencia)) + 
+  geom_bar(stat = "identity") + 
+* geom_hline(aes(yintercept = mean(frecuencia)) )
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-6-1.png" style="display: block; margin: auto;" /&gt;
+
+geom_hline: línea horizontal
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Agregando más atributos
+
+Nombres de mujer más populares de 2019
+
+
+
+```r
+top10 &lt;- guaguas %&gt;% 
+  filter(anio == 2019 &amp; sexo == "F") %&gt;% 
+  arrange(desc(n)) %&gt;% 
+  slice(1:10)
+*ggplot(top10, aes(x = nombre, y = n, fill = nombre)) +
+  geom_bar(stat = "identity")
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-7-1.png" style="display: block; margin: auto;" /&gt;
+
+
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Agregando más atributos
+
+
+
+
+```r
+guaguas %&gt;% 
+  filter(nombre == "Eduardo" &amp; sexo == "M") %&gt;% 
+  ggplot(aes(x = anio, y = n, color = "coral")) +
+  geom_line() +
+  geom_vline(xintercept = c(1965, 1982), linetype="dotted" ) + 
+* labs(title="El nombre Eduardo a lo largo de la historia",
+*       x ="año", y = "frecuencia") +
+* theme(plot.title = element_text(hjust = 0.5))
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-8-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Un poco más sobre theme
+
+`theme` nos permite modificar elementos estéticos
+
+
+
+
+```r
+guaguas %&gt;% 
+  filter(nombre == "Eduardo" &amp; sexo == "M") %&gt;% 
+  ggplot(aes(x = anio, y = n, color = "coral")) +
+  geom_line() +
+  geom_vline(xintercept = c(1965, 1982), linetype="dotted" ) + 
+* labs(title="El nombre Eduardo a lo largo de la historia",
+*       x ="año", y = "frecuencia") +
+  theme(plot.title = element_text(hjust = 0.5),
+*       axis.text.x = element_text(angle = 90, color = "red" ))
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-9-1.png" style="display: block; margin: auto;" /&gt;
+
+---
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Agreguemos más cosas al gráfico 
+
+
+```r
+guaguas %&gt;% 
+  filter(sexo == "F") %&gt;% 
+* filter(nombre %in% c("Sofía", "María", "Amanda") &amp; anio &gt; 1980) %&gt;%
+  ggplot(aes(anio, n, color = nombre)) +
+  geom_point() +
+  geom_line() +
+  labs(x = "año", y = "total inscripciones",
+       title = "Algunos nombre de mujer a lo largo de la historia") +
+* theme(plot.title = element_text(hjust = 0.5, size = 16, color = "blue"))
+```
+
+&lt;img src="visualizacion-1_files/figure-html/unnamed-chunk-10-1.png" style="display: block; margin: auto;" /&gt;
+
 
 ---
 
@@ -54,7 +347,7 @@ class: center, middle
 
 ## Proyecto Ciencia de Datos
 
-### Mayo 2023
+## Visualización con ggplot I
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
