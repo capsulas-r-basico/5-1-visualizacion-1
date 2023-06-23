@@ -192,6 +192,28 @@ ggplot(data = tabla, aes(x = sexo, y = frecuencia)) +
 ```
 
 ---
+
+background-image: url("imagenes/fondo2.PNG")
+background-size: contain;
+background-position: 100% 0%
+
+# Sigamos la instrucción de ggplot
+
+```{r, fig.height = 4, fig.width = 5}
+ggplot(data = tabla, aes(x = sexo)) + #<<
+  geom_bar()
+```
+
+
+--
+
+### geom_bar cuenta el número de filas en cada categorías
+
+--
+
+### En ciertas ocasiones será útil 
+
+---
 background-image: url("imagenes/fondo2.PNG")
 background-size: contain;
 background-position: 100% 0%
@@ -307,6 +329,7 @@ class: center, middle
 
 ## INE Educa: Clases abiertas de R
 
+## Visualización con ggplot I
+
 ## Proyecto Ciencia de Datos
 
-## Visualización con ggplot I
